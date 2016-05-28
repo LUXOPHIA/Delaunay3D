@@ -1,9 +1,9 @@
-unit LUX.Brep.TetraMesh.Delaunay;
+unit LUX.Brep.Cell.TetraFlip.D3.Delaunay;
 
 interface //#################################################################### ■
 
 uses LUX, LUX.D3, LUX.Geometry, LUX.Geometry.D3, LUX.Graph, LUX.Graph.Tree,
-     LUX.Brep, LUX.Brep.TetraMesh;
+     LUX.Brep, LUX.Brep.Cell.TetraFlip, LUX.Brep.Cell.TetraFlip.D3;
 
 type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
 
@@ -13,38 +13,27 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TDelaPoin
 
-     TDelaPoin = class( TTetraPoin )
+     TDelaPoin = class( TTetraPoin3D )
      private
      protected
-       _Value :Single;
      public
-       ///// プロパティ
-       property Value :Single read _Value write _Value;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TDelaCell
 
-     TDelaCell = class( TTetraCell )
+     TDelaCell = class( TTetraCell3D<TDelaPoin,TDelaCell> )
      private
      protected
        _Flag :Byte;
        _CS2  :TSingleSpher2;
-       ///// アクセス
-       function GetPoin( const I_:Byte ) :TDelaPoin;
-       procedure SetPoin( const I_:Byte; const Poin_:TDelaPoin );
-       function GetCell( const I_:Byte ) :TDelaCell;
-       procedure SetCell( const I_:Byte; const Cell_:TDelaCell );
      public
-       ///// プロパティ
-       property Poin[ const I_:Byte ] :TDelaPoin read GetPoin write SetPoin;
-       property Cell[ const I_:Byte ] :TDelaCell read GetCell write SetCell;
-       /////
+       ///// メソッド
        function HitOK( const Pos_:TSingle3D ) :Boolean;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TDelaunay3D
 
-     TDelaunay3D = class( TTetraModel<TDelaPoin,TDelaCell> )
+     TDelaunay3D = class( TTetraModel3D<TDelaPoin,TDelaCell> )
      type
        TJoint = record
          Cell1 :TDelaCell;  Vert1 :Byte;  Edge1 :Byte;
@@ -54,18 +43,15 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
      private
        _TEMP :TFold;
      protected
-       _InnerCells :TFold;
-       _OuterCells :TFold;
-       ///// アクセス
-       function GetCells( const I_:Integer ) :TDelaCell; override;
-       function GetCellsN :Integer; override;
+       _OuterCells :TTetraModel<TDelaPoin,TDelaCell>;
        ///// メソッド
        procedure Init3;
      public
-       constructor Create; overload;
+       constructor Create; overload; override;
        constructor Create( const P1_,P2_,P3_:TSingle3D ); overload;
        destructor Destroy; override;
        ///// メソッド
+       procedure DeleteChilds; override;
        function AddCell( const Poin0_,Poin1_,Poin2_,Poin3_:TDelaPoin ) :TDelaCell;
        function HitCell( const Pos_:TSingle3D ) :TDelaCell;
        function AddPoin( const Pos_:TSingle3D ) :TDelaPoin;
@@ -99,27 +85,9 @@ implementation //###############################################################
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
-function TDelaCell.GetPoin( const I_:Byte ) :TDelaPoin;
-begin
-     Result := TDelaPoin( inherited Poin[ I_ ] );
-end;
-
-procedure TDelaCell.SetPoin( const I_:Byte; const Poin_:TDelaPoin );
-begin
-     inherited Poin[ I_ ] := Poin_;
-end;
-
-function TDelaCell.GetCell( const I_:Byte ) :TDelaCell;
-begin
-     Result := TDelaCell( inherited Cell[ I_ ] );
-end;
-
-procedure TDelaCell.SetCell( const I_:Byte; const Cell_:TDelaCell );
-begin
-     inherited Cell[ I_ ] := Cell_;
-end;
-
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+/////////////////////////////////////////////////////////////////////// メソッド
 
 function TDelaCell.HitOK( const Pos_:TSingle3D ) :Boolean;
 begin
@@ -136,18 +104,6 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
-/////////////////////////////////////////////////////////////////////// アクセス
-
-function TDelaunay3D.GetCells( const I_:Integer ) :TDelaCell;
-begin
-     Result := TDelaCell( _InnerCells[ I_ ] );
-end;
-
-function TDelaunay3D.GetCellsN :Integer;
-begin
-     Result := _InnerCells.ChildsN;
-end;
-
 /////////////////////////////////////////////////////////////////////// メソッド
 
 procedure TDelaunay3D.Init3;
@@ -155,9 +111,9 @@ var
    P1, P2, P3 :TDelaPoin;
    C0, C1 :TDelaCell;
 begin
-     P1 := Poins[ 0 ];
-     P2 := Poins[ 1 ];
-     P3 := Poins[ 2 ];
+     P1 := PoinModel[ 0 ];
+     P2 := PoinModel[ 1 ];
+     P3 := PoinModel[ 2 ];
 
      C0 := AddCell( nil, P1, P2, P3 );
      C1 := AddCell( nil, P1, P3, P2 );
@@ -185,8 +141,7 @@ constructor TDelaunay3D.Create;
 begin
      inherited;
 
-     _InnerCells := TFold.Create( _Cells );
-     _OuterCells := TFold.Create( _Cells );
+     _OuterCells := TTetraModel<TDelaPoin,TDelaCell>.Create;
 
      _TEMP := TFold.Create;
 end;
@@ -195,11 +150,9 @@ constructor TDelaunay3D.Create( const P1_,P2_,P3_:TSingle3D );
 begin
      Create;
 
-     //////////
-
-     TDelaPoin.Create( P1_, _Poins );
-     TDelaPoin.Create( P2_, _Poins );
-     TDelaPoin.Create( P3_, _Poins );
+     TDelaPoin.Create( P1_, _PoinModel );
+     TDelaPoin.Create( P2_, _PoinModel );
+     TDelaPoin.Create( P3_, _PoinModel );
 
      Init3;
 end;
@@ -208,10 +161,19 @@ destructor TDelaunay3D.Destroy;
 begin
      _TEMP.Free;
 
+     _OuterCells.Free;
+
      inherited;
 end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
+
+procedure TDelaunay3D.DeleteChilds;
+begin
+     inherited;
+
+     _OuterCells.DeleteChilds;
+end;
 
 function TDelaunay3D.AddCell( const Poin0_,Poin1_,Poin2_,Poin3_:TDelaPoin ) :TDelaCell;
 var
@@ -232,18 +194,18 @@ begin
 
           if I < 0 then
           begin
-               Paren := _InnerCells;
+               Paren := TDelaCell( Self );
 
                _CS2 := CircumSpher2;
           end
           else
           begin
-               Paren := _OuterCells;
+               Paren := TDelaCell( _OuterCells );
 
                with _CS2 do
                begin
-                    Center := VoroVec[ I ];
-                    Radiu2 := DotProduct( Center, _Poin[ _VertTable[ I ]._[ 1 ] ].Position );
+                    Center := FaceNorm[ I ];
+                    Radiu2 := DotProduct( Center, _Poin[ _VertTable[ I ]._[ 1 ] ].Pos );
                end;
           end;
      end;
@@ -257,20 +219,17 @@ begin
      begin
           for I := 0 to ChildsN-1 do
           begin
-               Result := TDelaCell( Childs[ I ] );
+               Result := Childs[ I ];
 
                if Result.HitOK( Pos_ ) then Exit;
           end;
      end;
 
-     with _InnerCells do
+     for I := 0 to ChildsN-1 do
      begin
-          for I := 0 to ChildsN-1 do
-          begin
-               Result := TDelaCell( Childs[ I ] );
+          Result := Childs[ I ];
 
-               if Result.HitOK( Pos_ ) then Exit;
-          end;
+          if Result.HitOK( Pos_ ) then Exit;
      end;
 
      Result := nil;
@@ -278,16 +237,16 @@ end;
 
 function TDelaunay3D.AddPoin( const Pos_:TSingle3D ) :TDelaPoin;
 begin
-     Result := TDelaPoin.Create( Pos_, _Poins );
+     Result := TDelaPoin.Create( Pos_, _PoinModel );
 
-     if PoinsN > 3 then AddPoin3( Result )
-                   else
-     if PoinsN = 3 then Init3;
+     if _PoinModel.ChildsN > 3 then AddPoin3( Result )
+                               else
+     if _PoinModel.ChildsN = 3 then Init3;
 end;
 
 procedure TDelaunay3D.AddPoin3( const Poin_:TDelaPoin );
 begin
-     AddPoin3( Poin_, HitCell( Poin_.Position ) );
+     AddPoin3( Poin_, HitCell( Poin_.Pos ) );
 end;
 
 procedure TDelaunay3D.AddPoin3( const Poin_:TDelaPoin; const Cell_:TDelaCell );
@@ -331,7 +290,7 @@ procedure TDelaunay3D.AddPoin3( const Poin_:TDelaPoin; const Cell_:TDelaCell );
           begin
                case _Flag of
                  0: begin
-                         if HitOK( Poin_.Position ) then
+                         if HitOK( Poin_.Pos ) then
                          begin
                               _Flag := 1;
 
@@ -388,7 +347,7 @@ procedure TDelaunay3D.AddPoin3( const Poin_:TDelaPoin; const Cell_:TDelaCell );
 
                          //   Cell[ 0 ] := Cell_;
                          //   Vert[ 0 ] := Vert_;
-                         //   Bond[ 0 ] := BondTable[ 1 ]._[ E1_ ];
+                         //   Bond[ 0 ] := _BondTable[ 1 ]._[ E1_ ];
 
                               Cell[ 1 ] := C; Vert[ 1 ] := 0; //Bond[ 1 ] := 1;
                               Cell[ 2 ] := C; Vert[ 2 ] := 0; //Bond[ 2 ] := 2;
