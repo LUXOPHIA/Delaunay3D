@@ -28,30 +28,20 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        ///// アクセス
        function GetVolum2 :Single;
        function GetVolume :Single;
-       function GetBarycenter :TSingle3D;
-       function GetInnerCenter :TSingle3D;
-       function GetInnerRadius :Single;
-       function GetInnerSphere :TSingleSphere;
        function GetCircumCenter :TSingle3D;
        function GetCircumSpher2 :TSingleSpher2;
        function GetCircumSphere :TSingleSphere;
-       function GetFaceArea( const I_:Byte ) :Single;
-       function GetFaceNorm( const I_:Byte ) :TSingle3D;
-       function GetVoroEdge( const I_:Byte ) :TSingle3D;
+       function GetVoroVec( const I_:Byte ) :TSingle3D;
+       function GetBarycenter :TSingle3D;
      public
        ///// プロパティ
-       property Volum2                    :Single        read GetVolum2      ;
-       property Volume                    :Single        read GetVolume      ;
-       property Barycenter                :TSingle3D     read GetBarycenter  ;
-       property InnerCenter               :TSingle3D     read GetInnerCenter ;
-       property InnerRadius               :Single        read GetInnerRadius ;
-       property InnerSphere               :TSingleSphere read GetInnerSphere ;
-       property CircumCenter              :TSingle3D     read GetCircumCenter;
-       property CircumSpher2              :TSingleSpher2 read GetCircumSpher2;
-       property CircumSphere              :TSingleSphere read GetCircumSphere;
-       property FaceArea[ const I_:Byte ] :Single        read GetFaceArea    ;
-       property FaceNorm[ const I_:Byte ] :TSingle3D     read GetFaceNorm    ;
-       property VoroEdge[ const I_:Byte ] :TSingle3D     read GetVoroEdge    ;
+       property Volum2                   :Single        read GetVolum2      ;
+       property Volume                   :Single        read GetVolume      ;
+       property CircumCenter             :TSingle3D     read GetCircumCenter;
+       property CircumSpher2             :TSingleSpher2 read GetCircumSpher2;
+       property CircumSphere             :TSingleSphere read GetCircumSphere;
+       property VoroVec[ const I_:Byte ] :TSingle3D     read GetVoroVec     ;
+       property Barycenter               :TSingle3D     read GetBarycenter  ;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTetraCell3D
@@ -121,42 +111,6 @@ end;
 
 //------------------------------------------------------------------------------
 
-function TTetraCell3D<_TPoin_,_TCell_>.GetBarycenter :TSingle3D;
-begin
-     Result := LUX.Geometry.D3.Barycenter( TTetraPoin3D( _Poin[ 0 ] ).Pos,      {ToDo: 本来キャスト不要}
-                                           TTetraPoin3D( _Poin[ 1 ] ).Pos,
-                                           TTetraPoin3D( _Poin[ 2 ] ).Pos,
-                                           TTetraPoin3D( _Poin[ 3 ] ).Pos );
-end;
-
-//------------------------------------------------------------------------------
-
-function TTetraCell3D<_TPoin_,_TCell_>.GetInnerCenter :TSingle3D;
-begin
-     Result := LUX.Geometry.D3.InnerCenter( TTetraPoin3D( _Poin[ 0 ] ).Pos,     {ToDo: 本来キャスト不要}
-                                            TTetraPoin3D( _Poin[ 1 ] ).Pos,
-                                            TTetraPoin3D( _Poin[ 2 ] ).Pos,
-                                            TTetraPoin3D( _Poin[ 3 ] ).Pos );
-end;
-
-function TTetraCell3D<_TPoin_,_TCell_>.GetInnerRadius :Single;
-begin
-     Result := LUX.Geometry.D3.InnerRadius( TTetraPoin3D( _Poin[ 0 ] ).Pos,     {ToDo: 本来キャスト不要}
-                                            TTetraPoin3D( _Poin[ 1 ] ).Pos,
-                                            TTetraPoin3D( _Poin[ 2 ] ).Pos,
-                                            TTetraPoin3D( _Poin[ 3 ] ).Pos );
-end;
-
-function TTetraCell3D<_TPoin_,_TCell_>.GetInnerSphere :TSingleSphere;
-begin
-     Result := TSingleSphere.Inner( TTetraPoin3D( _Poin[ 0 ] ).Pos,             {ToDo: 本来キャスト不要}
-                                    TTetraPoin3D( _Poin[ 1 ] ).Pos,
-                                    TTetraPoin3D( _Poin[ 2 ] ).Pos,
-                                    TTetraPoin3D( _Poin[ 3 ] ).Pos );
-end;
-
-//------------------------------------------------------------------------------
-
 function TTetraCell3D<_TPoin_,_TCell_>.GetCircumCenter :TSingle3D;
 begin
      Result := LUX.Geometry.D3.CircumCenter( TTetraPoin3D( _Poin[ 0 ] ).Pos,    {ToDo: 本来キャスト不要}
@@ -175,27 +129,12 @@ end;
 
 function TTetraCell3D<_TPoin_,_TCell_>.GetCircumSphere :TSingleSphere;
 begin
-     Result := TSingleSphere.Create( TTetraPoin3D( _Poin[ 0 ] ).Pos,            {ToDo: 本来キャスト不要}
-                                     TTetraPoin3D( _Poin[ 1 ] ).Pos,
-                                     TTetraPoin3D( _Poin[ 2 ] ).Pos,
-                                     TTetraPoin3D( _Poin[ 3 ] ).Pos );
+     Result := GetCircumSpher2;
 end;
 
 //------------------------------------------------------------------------------
 
-function TTetraCell3D<_TPoin_,_TCell_>.GetFaceArea( const I_:Byte ) :Single;
-begin
-     with _VertTable[ I_ ] do
-     begin
-          Result := HeronArea( TTetraPoin3D( _Poin[ _[ 1 ] ] ).Pos,             {ToDo: 本来キャスト不要}
-                               TTetraPoin3D( _Poin[ _[ 2 ] ] ).Pos,
-                               TTetraPoin3D( _Poin[ _[ 3 ] ] ).Pos );
-     end;
-end;
-
-//------------------------------------------------------------------------------
-
-function TTetraCell3D<_TPoin_,_TCell_>.GetFaceNorm( const I_:Byte ) :TSingle3D;
+function TTetraCell3D<_TPoin_,_TCell_>.GetVoroVec( const I_:Byte ) :TSingle3D;
 begin
      with _VertTable[ I_ ] do
      begin
@@ -205,14 +144,14 @@ begin
      end;
 end;
 
-function TTetraCell3D<_TPoin_,_TCell_>.GetVoroEdge( const I_:Byte ) :TSingle3D;
-var
-   C :TTetraCell3D;
-begin
-     C := TTetraCell3D( Cell[ I_ ] );
+//------------------------------------------------------------------------------
 
-     if Assigned( C ) and ( C.Open = -1 ) then Result := CircumCenter.VectorTo( C.CircumCenter )
-                                          else Result := FaceNorm[ I_ ];
+function TTetraCell3D<_TPoin_,_TCell_>.GetBarycenter :TSingle3D;
+begin
+     Result := LUX.Geometry.D3.Barycenter( TTetraPoin3D( _Poin[ 0 ] ).Pos,      {ToDo: 本来キャスト不要}
+                                           TTetraPoin3D( _Poin[ 1 ] ).Pos,
+                                           TTetraPoin3D( _Poin[ 2 ] ).Pos,
+                                           TTetraPoin3D( _Poin[ 3 ] ).Pos );
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
