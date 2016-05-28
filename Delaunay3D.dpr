@@ -18,7 +18,9 @@ uses
   LUX.Brep in '_LIBRARY\LUXOPHIA\LUX.Brep\LUX.Brep.pas',
   LUX.Brep.Cell.TetraFlip.D3 in '_LIBRARY\LUXOPHIA\LUX.Brep\LUX.Brep.Cell.TetraFlip.D3.pas',
   LUX.Brep.Cell.TetraFlip in '_LIBRARY\LUXOPHIA\LUX.Brep\LUX.Brep.Cell.TetraFlip.pas',
-  LUX.Brep.Poin in '_LIBRARY\LUXOPHIA\LUX.Brep\LUX.Brep.Poin.pas';
+  LUX.Brep.Poin in '_LIBRARY\LUXOPHIA\LUX.Brep\LUX.Brep.Poin.pas',
+  LUX.Matrix.L3 in '_LIBRARY\LUXOPHIA\LUX.Matrix\LUX.Matrix.L3.pas',
+  LUX.Matrix.L2 in '_LIBRARY\LUXOPHIA\LUX.Matrix\LUX.Matrix.L2.pas';
 
 {$R *.res}
 
