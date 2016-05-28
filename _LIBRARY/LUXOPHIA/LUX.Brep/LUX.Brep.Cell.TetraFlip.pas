@@ -56,7 +56,6 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        function GetJoin( const K_,I_:Byte ) :Byte;
        function GetOpen :Shortint;
      public
-       destructor Destroy; override;
        ///// プロパティ
        property Poin[ const I_:Byte ]    :_TPoin_  read GetPoin write SetPoin;
        property Cell[ const I_:Byte ]    :_TCell_  read GetCell write SetCell;
@@ -76,9 +75,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        constructor Create; override;
        destructor Destroy; override;
        ///// プロパティ
-       property PoinModel :TPoinModel<_TPoin_> read _PoinModel;
-       ///// メソッド
-       procedure DeleteChilds; override;
+       property PoinModel :TPoinModel<_TPoin_>          read   _PoinModel;
      end;
 
 const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
@@ -177,26 +174,6 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
-destructor TTetraCell<_TPoin_,_TCell_>.Destroy;
-var
-   I :Integer;
-   C0, C1 :TTetraCell<_TPoin_,_TCell_>;
-begin
-     for I := 0 to 3 do
-     begin
-          C1 := TTetraCell<_TPoin_,_TCell_>( Cell[ I ] );
-
-          if Assigned( C1 ) then
-          begin
-               C0 := TTetraCell<_TPoin_,_TCell_>( C1.Cell[ Vert[ I ] ] );
-
-               if C0 = Self then C1.Cell[ Vert[ I ] ] := nil;                   {ToDO: 相互接続されていない場合があるらしい}
-          end;
-     end;
-
-     inherited;
-end;
-
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TTetraModel<_TPos_>
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
@@ -217,15 +194,6 @@ begin
      _PoinModel.Free;
 
      inherited;
-end;
-
-/////////////////////////////////////////////////////////////////////// メソッド
-
-procedure TTetraModel<_TPoin_,_TCell_>.DeleteChilds;
-begin
-     inherited;
-
-     _PoinModel.DeleteChilds;
 end;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
