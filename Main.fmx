@@ -89,9 +89,19 @@ object Form1: TForm1
       Size.Width = 100.000000000000000000
       Size.Height = 50.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 0
+      TabOrder = 1
       Text = #28857#36861#21152
       OnClick = Button1Click
+    end
+    object Button2: TButton
+      Position.X = 10.000000000000000000
+      Position.Y = 70.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Text = #20445#23384
+      OnClick = Button2Click
     end
   end
   object LightMaterialSourceV: TLightMaterialSource
