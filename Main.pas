@@ -22,12 +22,14 @@ type
     Panel1: TPanel;
     LightMaterialSourceD: TLightMaterialSource;
     LightMaterialSourceV: TLightMaterialSource;
+    Button2: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Viewport3D1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
     procedure Viewport3D1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Single);
     procedure Viewport3D1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+    procedure Button2Click(Sender: TObject);
   private
     { private êÈåæ }
     _MouseP :TPointF;
@@ -93,7 +95,7 @@ begin
      _Delaunay3D.Free;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 procedure TForm1.Viewport3D1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
@@ -123,7 +125,7 @@ begin
      _MouseS := [];
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
@@ -135,6 +137,11 @@ begin
      _VoroEdges.MakeModel;
 
      Viewport3D1.Repaint;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+     _Delaunay3D.SaveToFile( 'Model.tetf' );
 end;
 
 end. //######################################################################### Å°
