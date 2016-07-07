@@ -1,6 +1,6 @@
-unit Main;
+Ôªøunit Main;
 
-interface  //################################################################### Å°
+interface  //################################################################### ‚ñ†
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
@@ -31,11 +31,11 @@ type
     procedure Viewport3D1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
     procedure Button2Click(Sender: TObject);
   private
-    { private êÈåæ }
+    { private ÂÆ£Ë®Ä }
     _MouseP :TPointF;
     _MouseS :TShiftState;
   public
-    { public êÈåæ }
+    { public ÂÆ£Ë®Ä }
     _Delaunay3D :TDelaunay3D;
     _DelaEdges  :TDelaEdges;
     _VoroEdges  :TVoroEdges;
@@ -44,7 +44,7 @@ type
 var
   Form1: TForm1;
 
-implementation //############################################################### Å°
+implementation //############################################################### ‚ñ†
 
 {$R *.fmx}
 
@@ -144,4 +144,4 @@ begin
      _Delaunay3D.SaveToFile( 'Model.tetf' );
 end;
 
-end. //######################################################################### Å°
+end. //######################################################################### ‚ñ†
