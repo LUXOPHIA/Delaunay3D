@@ -2,151 +2,81 @@
 
 interface //#################################################################### ■
 
-uses System.SysUtils, System.UITypes, System.Math.Vectors,
-     FMX.Graphics, FMX.Types3D, FMX.Controls3D, FMX.Objects3D;
+uses System.Classes, System.Generics.Collections;
 
-type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
+type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【 T Y P E 】
 
-     PPByte = ^PByte;
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TArray*
 
-     PInt8   = ^Int8;
-     PUInt8  = ^UInt8;
-     PInt16  = ^Int16;
-     PUInt16 = ^UInt16;
-     PInt32  = ^Int32;
-     PUInt32 = ^UInt32;
+     TArray2<T> = array of TArray <T>;
+     TArray3<T> = array of TArray2<T>;
 
-     PIntPtr  = ^IntPtr;
-     PUIntPtr = ^UIntPtr;
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TConstProc*
 
-     TArray2<TValue_> = array of TArray <TValue_>;
-     TArray3<TValue_> = array of TArray2<TValue_>;
+     TConstProc<TA         > = reference to procedure( const A:TA                                     );
+     TConstProc<TA,TB      > = reference to procedure( const A:TA; const B:TB                         );
+     TConstProc<TA,TB,TC   > = reference to procedure( const A:TA; const B:TB; const C:TC             );
+     TConstProc<TA,TB,TC,TD> = reference to procedure( const A:TA; const B:TB; const C:TC; const D:TD );
 
-     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【レコード】
+     TConstProc1<T> = reference to procedure( const A:T       );
+     TConstProc2<T> = reference to procedure( const A,B:T     );
+     TConstProc3<T> = reference to procedure( const A,B,C:T   );
+     TConstProc4<T> = reference to procedure( const A,B,C,D:T );
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HMatrix3D
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TConstFunc*
 
-     HMatrix3D = record helper for TMatrix3D
+     TConstFunc<TA,         TResult> = reference to function( const A:TA                                     ) :TResult;
+     TConstFunc<TA,TB,      TResult> = reference to function( const A:TA; const B:TB                         ) :TResult;
+     TConstFunc<TA,TB,TC,   TResult> = reference to function( const A:TA; const B:TB; const C:TC             ) :TResult;
+     TConstFunc<TA,TB,TC,TD,TResult> = reference to function( const A:TA; const B:TB; const C:TC; const D:TD ) :TResult;
+
+     TConstFunc1<T,TResult> = reference to function( const A:T       ) :TResult;
+     TConstFunc2<T,TResult> = reference to function( const A,B:T     ) :TResult;
+     TConstFunc3<T,TResult> = reference to function( const A,B,C:T   ) :TResult;
+     TConstFunc4<T,TResult> = reference to function( const A,B,C,D:T ) :TResult;
+
+     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【 R E C O R D 】
+
+     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TDelegates
+
+     TDelegates = record
+     private type
+       THolder = class( TInterfacedObject )
+         _Events :TArray<TNotifyEvent>;
+       end;
      private
-       ///// アクセス
-       function GetTranslate :TPoint3D; inline;
-       procedure SetTranslate( const Translate_:TPoint3D ); inline;
+       _Keeper :IInterface;  // 寿命管理（参照カウント）
+       _Holder :THolder;     // 実体（レコードのコピー間で共有される）
      public
-       ///// プロパティ
-       property Translate :TPoint3D read GetTranslate write SetTranslate;
-       ///// 定数
-       class function Identity :TMatrix3D; static;
+       class operator Initialize( out D_:TDelegates );
+       ///// M E T H O D
+       procedure Add( E_:TNotifyEvent );
+       procedure Del( const E_:TNotifyEvent );
+       procedure Run( const Sender_:TObject );
      end;
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HBitmapData
+     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【 C L A S S 】
 
-     HBitmapData = record helper for TBitmapData
-     private
-       ///// アクセス
-       function GetColor( const X_,Y_:Integer ) :TAlphaColor; inline;
-       procedure SetColor( const X_,Y_:Integer; const Color_:TAlphaColor ); inline;
-     public
-       ///// プロパティ
-       property Color[ const X_,Y_:Integer ] :TAlphaColor read GetColor write SetColor;
-     end;
+const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【 C O N S T A N T 】
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRay3D
+      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EPS
 
-     TRay3D = record
-     private
-     public
-       Pos :TVector3D;
-       Vec :TVector3D;
-       /////
-       constructor Create( const Pos_,Vec_:TVector3D );
-     end;
+      SINGLE_EPS = 1.1920928955078125E-7;
+      DOUBLE_EPS = 2.220446049250313080847263336181640625E-16;
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRangeArray<_TValue_>
+      SINGLE_EPS1 = SINGLE_EPS * 1E1;
+      DOUBLE_EPS1 = DOUBLE_EPS * 1E1;
 
-     TRangeArray<_TValue_> = record
-     private
-       _Values :TArray<_TValue_>;
-       _MinI   :Integer;
-       _MaxI   :Integer;
-       ///// アクセス
-       function GetValues( const I_:Integer ) :_TValue_;
-       procedure SetValues( const I_:Integer; const Value_:_TValue_ );
-       procedure SetMinI( const MinI_:Integer );
-       procedure SetMaxI( const MaxI_:Integer );
-       function GetCount :Integer;
-       ///// メソッド
-       procedure InitArray;
-     public
-       constructor Create( const MinI_,MaxI_:Integer );
-       ///// プロパティ
-       property Values[ const I_:Integer ] :_TValue_ read GetValues write SetValues; default;
-       property MinI                       :Integer  read   _MinI   write SetMinI  ;
-       property MaxI                       :Integer  read   _MaxI   write SetMaxI  ;
-       property Count                      :Integer  read GetCount                 ;
-       ///// メソッド
-       procedure SetRange( const I_:Integer ); overload;
-       procedure SetRange( const MinI_,MaxI_:Integer ); overload;
-     end;
+      SINGLE_EPS2 = SINGLE_EPS * 1E2;
+      DOUBLE_EPS2 = DOUBLE_EPS * 1E2;
 
-     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【クラス】
+      SINGLE_EPS3 = SINGLE_EPS * 1E3;
+      DOUBLE_EPS3 = DOUBLE_EPS * 1E3;
 
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HCanvas
+      SINGLE_EPS4 = SINGLE_EPS * 1E4;
+      DOUBLE_EPS4 = DOUBLE_EPS * 1E4;
 
-     HCanvas = class helper for TCanvas
-     private
-     protected
-       ///// アクセス
-       function GetMatrix :TMatrix;
-       procedure SetMatrix( const Matrix_:TMatrix );
-     public
-       property Matrix :TMatrix read GetMatrix write SetMatrix;
-     end;
-
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HControl3D
-
-     HControl3D = class helper for TControl3D
-     private
-     protected
-       ///// アクセス
-       function GetAbsolMatrix :TMatrix3D; inline;
-       procedure SetAbsoluteMatrix( const AbsoluteMatrix_:TMatrix3D ); virtual;
-       function GetLocalMatrix :TMatrix3D; virtual;
-       procedure SetLocalMatrix( const LocalMatrix_:TMatrix3D ); virtual;
-       ///// メソッド
-       procedure RecalcFamilyAbsolute; inline;
-       procedure RecalcChildrenAbsolute;
-     public
-       ///// プロパティ
-       property AbsoluteMatrix :TMatrix3D read GetAbsolMatrix write SetAbsoluteMatrix;
-       property LocalMatrix    :TMatrix3D read GetLocalMatrix write SetLocalMatrix;
-     end;
-
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HCustomMesh
-
-     HCustomMesh = class helper for TCustomMesh
-     private
-     protected
-       ///// アクセス
-       function GetMeshData :TMeshData; inline;
-     public
-       ///// プロパティ
-       property MeshData :TMeshData read GetMeshData;
-     end;
-
-     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TIter< TValue_ >
-
-     TIter< TValue_ > = class
-     private
-     protected
-       ///// アクセス
-       function GetValue :TValue_; virtual; abstract;
-       procedure SetValue( const Value_:TValue_ ); virtual; abstract;
-     public
-       ///// プロパティ
-       property Value :TValue_ read GetValue write SetValue;
-     end;
-
-const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
+      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pi
 
       Pi2 = 2 * Pi;
       Pi3 = 3 * Pi;
@@ -156,32 +86,29 @@ const //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
       P3i = Pi / 3;
       P4i = Pi / 4;
 
-//var //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【変数】
+      P3i2 = Pi2 / 3;
 
-//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
+      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CRLF
 
-{$IF SizeOf( Extended ) = 10 }
-  function Int( const X_:Extended ) :Extended; inline; overload;
-  function Frac( const X_:Extended ) :Extended; inline; overload;
-  function Exp( const X_:Extended ) :Extended; inline; overload;
-  function Cos( const X_:Extended ) :Extended; inline; overload;
-  function Sin( const X_:Extended ) :Extended; inline; overload;
-  function Ln( const X_:Extended ) :Extended; inline; overload;
-  function ArcTan( const X_:Extended ) :Extended; inline; overload;
-  function Sqrt( const X_:Extended ) :Extended; inline; overload;
-  function Tangent( const X_:Extended ) :Extended; inline; overload;
-  procedure SineCosine( const X_:Extended; var Sin_,Cos_:Extended ); inline; overload;
-  function ExpMinus1( const X_:Extended) :Extended; inline; overload;
-  function LnXPlus1( const X_:Extended) :Extended; inline; overload;
-{$ENDIF}
+      CRLF = #13#10;
 
-function Pow2( const X_:Integer ) :Integer; inline; overload;
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【 R O U T I N E 】
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pow*
+
 function Pow2( const X_:Single ) :Single; inline; overload;
 function Pow2( const X_:Double ) :Double; inline; overload;
 
-function Pow3( const X_:Integer ) :Integer; inline; overload;
 function Pow3( const X_:Single ) :Single; inline; overload;
 function Pow3( const X_:Double ) :Double; inline; overload;
+
+function Pow4( const X_:Single ) :Single; inline; overload;
+function Pow4( const X_:Double ) :Double; inline; overload;
+
+function Pow5( const X_:Single ) :Single; inline; overload;
+function Pow5( const X_:Double ) :Double; inline; overload;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Roo*
 
 function Roo2( const X_:Single ) :Single; inline; overload;
 function Roo2( const X_:Double ) :Double; inline; overload;
@@ -189,365 +116,127 @@ function Roo2( const X_:Double ) :Double; inline; overload;
 function Roo3( const X_:Single ) :Single; inline; overload;
 function Roo3( const X_:Double ) :Double; inline; overload;
 
-function ClipRange( const X_,Min_,Max_:Integer ) :Integer; inline; overload;
-function ClipRange( const X_,Min_,Max_:Single ) :Single; inline; overload;
-function ClipRange( const X_,Min_,Max_:Double ) :Double; inline; overload;
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Clamp
 
-function Min( const A_,B_,C_:Integer ) :Integer; overload;
-function Min( const A_,B_,C_:Single ) :Single; overload;
-function Min( const A_,B_,C_:Double ) :Double; overload;
+function Clamp( const X_,Min_,Max_:Integer ) :Integer; inline; overload;
+function Clamp( const X_,Min_,Max_:Single ) :Single; inline; overload;
+function Clamp( const X_,Min_,Max_:Double ) :Double; inline; overload;
 
-function Max( const A_,B_,C_:Integer ) :Integer; overload;
-function Max( const A_,B_,C_:Single ) :Single; overload;
-function Max( const A_,B_,C_:Double ) :Double; overload;
+function ClampMin( const X_,Min_:Integer ) :Integer; inline; overload;
+function ClampMin( const X_,Min_:Single ) :Single; inline; overload;
+function ClampMin( const X_,Min_:Double ) :Double; inline; overload;
 
-function MinI( const A_,B_,C_:Integer ) :Integer; inline; overload;
-function MinI( const A_,B_,C_:Single ) :Integer; inline; overload;
-function MinI( const A_,B_,C_:Double ) :Integer; inline; overload;
+function ClampMax( const X_,Max_:Integer ) :Integer; inline; overload;
+function ClampMax( const X_,Max_:Single ) :Single; inline; overload;
+function ClampMax( const X_,Max_:Double ) :Double; inline; overload;
 
-function MaxI( const A_,B_,C_:Integer ) :Integer; inline; overload;
-function MaxI( const A_,B_,C_:Single ) :Integer; inline; overload;
-function MaxI( const A_,B_,C_:Double ) :Integer; inline; overload;
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Min
+
+function Min( const V1_,V2_,V3_:Integer ) :Integer; overload;
+function Min( const V1_,V2_,V3_:Single ) :Single; overload;
+function Min( const V1_,V2_,V3_:Double ) :Double; overload;
+
+function MinI( const V1_,V2_:Integer ) :Byte; inline; overload;
+function MinI( const V1_,V2_:Single ) :Byte; inline; overload;
+function MinI( const V1_,V2_:Double ) :Byte; inline; overload;
+
+function MinI( const V1_,V2_,V3_:Integer ) :Integer; inline; overload;
+function MinI( const V1_,V2_,V3_:Single ) :Integer; inline; overload;
+function MinI( const V1_,V2_,V3_:Double ) :Integer; inline; overload;
+
+function MinI( const V1_,V2_,V3_,V4_:Integer ) :Integer; inline; overload;
+function MinI( const V1_,V2_,V3_,V4_:Single ) :Integer; inline; overload;
+function MinI( const V1_,V2_,V3_,V4_:Double ) :Integer; inline; overload;
 
 function MinI( const Vs_:array of Integer ) :Integer; overload;
 function MinI( const Vs_:array of Single ) :Integer; overload;
 function MinI( const Vs_:array of Double ) :Integer; overload;
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Max
+
+function Max( const V1_,V2_,V3_:Integer ) :Integer; overload;
+function Max( const V1_,V2_,V3_:Single ) :Single; overload;
+function Max( const V1_,V2_,V3_:Double ) :Double; overload;
+
+function MaxI( const V1_,V2_:Integer ) :Byte; inline; overload;
+function MaxI( const V1_,V2_:Single ) :Byte; inline; overload;
+function MaxI( const V1_,V2_:Double ) :Byte; inline; overload;
+
+function MaxI( const V1_,V2_,V3_:Integer ) :Integer; inline; overload;
+function MaxI( const V1_,V2_,V3_:Single ) :Integer; inline; overload;
+function MaxI( const V1_,V2_,V3_:Double ) :Integer; inline; overload;
+
+function MaxI( const V1_,V2_,V3_,V4_:Integer ) :Integer; inline; overload;
+function MaxI( const V1_,V2_,V3_,V4_:Single ) :Integer; inline; overload;
+function MaxI( const V1_,V2_,V3_,V4_:Double ) :Integer; inline; overload;
+
 function MaxI( const Vs_:array of Integer ) :Integer; overload;
 function MaxI( const Vs_:array of Single ) :Integer; overload;
 function MaxI( const Vs_:array of Double ) :Integer; overload;
 
-function RealMod( const X_,Range_:Integer ) :Integer; overload;
-function RealMod( const X_,Range_:Int64 ) :Int64; overload;
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FloorMod
 
-function FileToBytes( const FileName_:string ) :TBytes;
+function FloorMod( const X_,DivN_:Integer ) :Integer; overload;
+function FloorMod( const X_,DivN_:Int64 ) :Int64; overload;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Binomial = Combination
+
+function Binomial32( N_,K_:UInt32 ) :UInt32;  // 0 <= K <= N, 0 <= N <= 34
+function Binomial64( N_,K_:UInt32 ) :UInt64;  // 0 <= K <= N, 0 <= N <= 67
+
+function Combination32( N_,K_:UInt32 ) :UInt32; inline;  // 0 <= K <= N, 0 <= N <= 34
+function Combination64( N_,K_:UInt32 ) :UInt64; inline;  // 0 <= K <= N, 0 <= N <= 67
 
 implementation //############################################################### ■
 
-uses System.Classes, System.Math,
-     FMX.Types;
+uses System.Math;
 
-//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【レコード】
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【 R E C O R D 】
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HMatrix3D
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
-
-/////////////////////////////////////////////////////////////////////// アクセス
-
-function HMatrix3D.GetTranslate :TPoint3D;
-begin
-     with Result do
-     begin
-          X := m41;
-          Y := m42;
-          Z := m43;
-     end;
-end;
-
-procedure HMatrix3D.SetTranslate( const Translate_:TPoint3D );
-begin
-     with Translate_ do
-     begin
-          m41 := X;
-          m42 := Y;
-          m43 := Z;
-     end;
-end;
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
-
-/////////////////////////////////////////////////////////////////////////// 定数
-
-class function HMatrix3D.Identity :TMatrix3D;
-begin
-     with Result do
-     begin
-          m11 := 1;  m12 := 0;  m13 := 0;  m14 := 0;
-          m21 := 0;  m22 := 1;  m23 := 0;  m24 := 0;
-          m31 := 0;  m32 := 0;  m33 := 1;  m34 := 0;
-          m41 := 0;  m42 := 0;  m43 := 0;  m44 := 1;
-     end;
-end;
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HBitmapData
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
-
-/////////////////////////////////////////////////////////////////////// アクセス
-
-function HBitmapData.GetColor( const X_,Y_:Integer ) :TAlphaColor;
-begin
-     Result := GetPixel( X_, Y_ );
-end;
-
-procedure HBitmapData.SetColor( const X_,Y_:Integer; const Color_:TAlphaColor );
-begin
-     SetPixel( X_, Y_, Color_ );
-end;
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRay3D
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TDelegates
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
-constructor TRay3D.Create( const Pos_,Vec_:TVector3D );
+//////////////////////////////////////////////////////////////////// M E T H O D
+
+class operator TDelegates.Initialize( out D_:TDelegates );
 begin
-     Pos := Pos_;
-     Vec := Vec_;
+     D_._Holder := THolder.Create;
+     D_._Keeper := D_._Holder;
 end;
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TRangeArray<_TValue_>
+//------------------------------------------------------------------------------
 
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
-
-/////////////////////////////////////////////////////////////////////// アクセス
-
-function TRangeArray<_TValue_>.GetValues( const I_:Integer ) :_TValue_;
+procedure TDelegates.Add( E_:TNotifyEvent );
 begin
-     Result := _Values[ I_ - _MinI ];
+     with _Holder do
+     if TArray.IndexOf<TNotifyEvent>( _Events, E_ ) < 0 then _Events := _Events + [ E_ ];
 end;
 
-procedure TRangeArray<_TValue_>.SetValues( const I_:Integer; const Value_:_TValue_ );
-begin
-     _Values[ I_ - _MinI ] := Value_;
-end;
-
-procedure TRangeArray<_TValue_>.SetMinI( const MinI_:Integer );
-begin
-     _MinI := MinI_;
-
-     InitArray;
-end;
-
-procedure TRangeArray<_TValue_>.SetMaxI( const MaxI_:Integer );
-begin
-     _MaxI := MaxI_;
-
-     InitArray;
-end;
-
-function TRangeArray<_TValue_>.GetCount :Integer;
-begin
-     Result := _MaxI - _MinI + 1;
-end;
-
-/////////////////////////////////////////////////////////////////////// メソッド
-
-procedure TRangeArray<_TValue_>.InitArray;
-begin
-     SetLength( _Values, GetCount );
-end;
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
-
-constructor TRangeArray<_TValue_>.Create( const MinI_,MaxI_:Integer );
-begin
-     SetRange( MinI_, MaxI_ );
-end;
-
-/////////////////////////////////////////////////////////////////////// メソッド
-
-procedure TRangeArray<_TValue_>.SetRange( const I_:Integer );
-begin
-     SetRange( I_, I_ );
-end;
-
-procedure TRangeArray<_TValue_>.SetRange( const MinI_,MaxI_:Integer );
-begin
-     _MinI := MinI_;
-     _MaxI := MaxI_;
-
-     InitArray;
-end;
-
-//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【クラス】
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HCanvas
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
-
-/////////////////////////////////////////////////////////////////////// アクセス
-
-function HCanvas.GetMatrix :TMatrix;
-begin
-     with Self do
-     begin
-          Result := FMatrix;
-     end;
-end;
-
-procedure HCanvas.SetMatrix( const Matrix_:TMatrix );
-begin
-     inherited SetMatrix( Matrix_ );
-end;
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HControl3D
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
-
-/////////////////////////////////////////////////////////////////////// アクセス
-
-function HControl3D.GetAbsolMatrix :TMatrix3D;
-begin
-     if FRecalcAbsolute then
-     begin
-          if FParent is TControl3D then FAbsoluteMatrix := FLocalMatrix * TControl3D(FParent).AbsoluteMatrix
-                                   else FAbsoluteMatrix := FLocalMatrix;
-
-          Result := FAbsoluteMatrix;
-
-          FInvAbsoluteMatrix := FAbsoluteMatrix.Inverse;
-
-          FRecalcAbsolute := False;
-     end
-     else Result := FAbsoluteMatrix;
-end;
-
-procedure HControl3D.SetAbsoluteMatrix( const AbsoluteMatrix_:TMatrix3D );
-begin
-        FAbsoluteMatrix := AbsoluteMatrix_;
-     FInvAbsoluteMatrix := AbsoluteMatrix_.Inverse;
-
-     if Assigned( FParent ) and ( FParent is TControl3D )
-     then FLocalMatrix := FAbsoluteMatrix * TControl3D( FParent ).AbsoluteMatrix.Inverse
-     else FLocalMatrix := FAbsoluteMatrix;
-
-     RecalcChildrenAbsolute;
-end;
-
-function HControl3D.GetLocalMatrix :TMatrix3D;
-begin
-     Result := FLocalMatrix;
-end;
-
-procedure HControl3D.SetLocalMatrix( const LocalMatrix_:TMatrix3D );
-begin
-     FLocalMatrix := LocalMatrix_;
-
-     RecalcFamilyAbsolute;
-end;
-
-/////////////////////////////////////////////////////////////////////// メソッド
-
-procedure HControl3D.RecalcFamilyAbsolute;
-begin
-     RecalcAbsolute;
-end;
-
-procedure HControl3D.RecalcChildrenAbsolute;
+procedure TDelegates.Del( const E_:TNotifyEvent );
 var
-   F :TFmxObject;
+   I :Integer;
 begin
-     FRecalcAbsolute := False;
-
-     if Assigned( Children ) then
+     with _Holder do
      begin
-          for F in Children do
-          begin
-               if F is TControl3D then TControl3D( F ).RecalcFamilyAbsolute;
-          end;
+          I := TArray.IndexOf<TNotifyEvent>( _Events, E_ );  if I < 0 then Exit;
+
+          Delete( _Events, I, 1 );
      end;
 end;
 
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HCustomMesh
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
-
-/////////////////////////////////////////////////////////////////////// アクセス
-
-function HCustomMesh.GetMeshData :TMeshData;
+procedure TDelegates.Run( const Sender_:TObject );
+var
+   E :TNotifyEvent;
 begin
-     Result := Data;
+     for E in Copy( _Holder._Events ) do E( Sender_ );  // ハンドラ内の Del に備えてコピーを走査
 end;
 
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【 R O U T I N E 】
 
-//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
-
-{$IF SizeOf( Extended ) = 10 }
-
-function Int( const X_:Extended ) :Extended;
-begin
-     Result := System.Int( X_ );
-end;
-
-function Frac( const X_:Extended ) :Extended;
-begin
-     Result := System.Frac( X_ );
-end;
-
-function Exp( const X_:Extended ) :Extended;
-begin
-     Result := System.Exp( X_ );
-end;
-
-function Cos( const X_:Extended ) :Extended;
-begin
-     Result := System.Cos( X_ );
-end;
-
-function Sin( const X_:Extended ) :Extended;
-begin
-     Result := System.Sin( X_ );
-end;
-
-function Ln( const X_:Extended ) :Extended;
-begin
-     Result := System.Ln( X_ );
-end;
-
-function ArcTan( const X_:Extended ) :Extended;
-begin
-     Result := System.ArcTan( X_ );
-end;
-
-function Sqrt( const X_:Extended ) :Extended;
-begin
-     Result := System.Sqrt( X_ );
-end;
-
-function Tangent( const X_:Extended ) :Extended;
-begin
-     Result := System.Tangent( X_ );
-end;
-
-procedure SineCosine( const X_:Extended; var Sin_,Cos_:Extended );
-begin
-     System.SineCosine( X_, Sin_, Cos_ );
-end;
-
-function ExpMinus1( const X_:Extended) :Extended;
-begin
-     Result := System.ExpMinus1( X_ );
-end;
-
-function LnXPlus1( const X_:Extended) :Extended;
-begin
-     Result := System.LnXPlus1( X_ );
-end;
-
-{$ENDIF}
-
-////////////////////////////////////////////////////////////////////////////////
-
-function Pow2( const X_:Integer ) :Integer;
-begin
-     Result := Sqr( X_ );
-end;
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pow
 
 function Pow2( const X_:Single ) :Single;
 begin
@@ -559,12 +248,7 @@ begin
      Result := Sqr( X_ );
 end;
 
-////////////////////////////////////////////////////////////////////////////////
-
-function Pow3( const X_:Integer ) :Integer;
-begin
-     Result := X_ * Pow2( X_ );
-end;
+//------------------------------------------------------------------------------
 
 function Pow3( const X_:Single ) :Single;
 begin
@@ -576,7 +260,31 @@ begin
      Result := X_ * Pow2( X_ );
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
+
+function Pow4( const X_:Single ) :Single;
+begin
+     Result := Pow2( Pow2( X_ ) );
+end;
+
+function Pow4( const X_:Double ) :Double;
+begin
+     Result := Pow2( Pow2( X_ ) );
+end;
+
+//------------------------------------------------------------------------------
+
+function Pow5( const X_:Single ) :Single;
+begin
+     Result := Pow4( X_ ) * X_;
+end;
+
+function Pow5( const X_:Double ) :Double;
+begin
+     Result := Pow4( X_ ) * X_;
+end;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Roo*
 
 function Roo2( const X_:Single ) :Single;
 begin
@@ -588,224 +296,258 @@ begin
      Result := Sqrt( X_ );
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 function Roo3( const X_:Single ) :Single;
 begin
-     Result := Power( X_, 1/3 );
+     Result := Sign( X_ ) * Power( Abs( X_ ), 1/3 );
 end;
 
 function Roo3( const X_:Double ) :Double;
 begin
-     Result := Power( X_, 1/3 );
+     Result := Sign( X_ ) * Power( Abs( X_ ), 1/3 );
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Clamp
 
-function ClipRange( const X_,Min_,Max_:Integer ) :Integer;
+function Clamp( const X_,Min_,Max_:Integer ) :Integer;
 begin
      if X_ < Min_ then Result := Min_
                   else
-     if X_ > Max_ then Result := Max_
+     if Max_ < X_ then Result := Max_
                   else Result := X_;
 end;
 
-function ClipRange( const X_,Min_,Max_:Single ) :Single;
+function Clamp( const X_,Min_,Max_:Single ) :Single;
 begin
      if X_ < Min_ then Result := Min_
                   else
-     if X_ > Max_ then Result := Max_
+     if Max_ < X_ then Result := Max_
                   else Result := X_;
 end;
 
-function ClipRange( const X_,Min_,Max_:Double ) :Double;
+function Clamp( const X_,Min_,Max_:Double ) :Double;
 begin
      if X_ < Min_ then Result := Min_
                   else
-     if X_ > Max_ then Result := Max_
+     if Max_ < X_ then Result := Max_
                   else Result := X_;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
-function Min( const A_,B_,C_:Integer ) :Integer;
+function ClampMin( const X_,Min_:Integer ) :Integer;
 begin
-     if A_ <= B_ then
+     if X_ < Min_ then Result := Min_
+                  else Result := X_;
+end;
+
+function ClampMin( const X_,Min_:Single ) :Single;
+begin
+     if X_ < Min_ then Result := Min_
+                  else Result := X_;
+end;
+
+function ClampMin( const X_,Min_:Double ) :Double;
+begin
+     if X_ < Min_ then Result := Min_
+                  else Result := X_;
+end;
+
+//------------------------------------------------------------------------------
+
+function ClampMax( const X_,Max_:Integer ) :Integer;
+begin
+     if Max_ < X_ then Result := Max_
+                  else Result := X_;
+end;
+
+function ClampMax( const X_,Max_:Single ) :Single;
+begin
+     if Max_ < X_ then Result := Max_
+                  else Result := X_;
+end;
+
+function ClampMax( const X_,Max_:Double ) :Double;
+begin
+     if Max_ < X_ then Result := Max_
+                  else Result := X_;
+end;
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Min
+
+function Min( const V1_,V2_,V3_:Integer ) :Integer;
+begin
+     if V1_ <= V2_ then
      begin
-          if A_ <= C_ then Result := A_
-                      else Result := C_;
+          if V1_ <= V3_ then Result := V1_ else Result := V3_;
      end
      else
      begin
-          if B_ <= C_ then Result := B_
-                      else Result := C_;
+          if V2_ <= V3_ then Result := V2_ else Result := V3_;
      end;
 end;
 
-function Min( const A_,B_,C_:Single ) :Single;
+function Min( const V1_,V2_,V3_:Single ) :Single;
 begin
-     if A_ <= B_ then
+     if V1_ <= V2_ then
      begin
-          if A_ <= C_ then Result := A_
-                      else Result := C_;
+          if V1_ <= V3_ then Result := V1_ else Result := V3_;
      end
      else
      begin
-          if B_ <= C_ then Result := B_
-                      else Result := C_;
+          if V2_ <= V3_ then Result := V2_ else Result := V3_;
      end;
 end;
 
-function Min( const A_,B_,C_:Double ) :Double;
+function Min( const V1_,V2_,V3_:Double ) :Double;
 begin
-     if A_ <= B_ then
+     if V1_ <= V2_ then
      begin
-          if A_ <= C_ then Result := A_
-                      else Result := C_;
+          if V1_ <= V3_ then Result := V1_ else Result := V3_;
      end
      else
      begin
-          if B_ <= C_ then Result := B_
-                      else Result := C_;
+          if V2_ <= V3_ then Result := V2_ else Result := V3_;
      end;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
-function Max( const A_,B_,C_:Integer ) :Integer;
+function MinI( const V1_,V2_:Integer ) :Byte;
 begin
-     if A_ >= B_ then
+     if V1_ <= V2_ then Result := 1 else Result := 2;
+end;
+
+function MinI( const V1_,V2_:Single ) :Byte;
+begin
+     if V1_ <= V2_ then Result := 1 else Result := 2;
+end;
+
+function MinI( const V1_,V2_:Double ) :Byte;
+begin
+     if V1_ <= V2_ then Result := 1 else Result := 2;
+end;
+
+//------------------------------------------------------------------------------
+
+function MinI( const V1_,V2_,V3_:Integer ) :Integer;
+begin
+     if V1_ <= V2_ then
      begin
-          if A_ >= C_ then Result := A_
-                      else Result := C_;
+          if V1_ <= V3_ then Result := 1 else Result := 3;
      end
      else
      begin
-
-          if B_ >= C_ then Result := B_
-                      else Result := C_;
+          if V2_ <= V3_ then Result := 2 else Result := 3;
      end;
 end;
 
-function Max( const A_,B_,C_:Single ) :Single;
+function MinI( const V1_,V2_,V3_:Single ) :Integer;
 begin
-     if A_ >= B_ then
+     if V1_ <= V2_ then
      begin
-          if A_ >= C_ then Result := A_
-                      else Result := C_;
+          if V1_ <= V3_ then Result := 1 else Result := 3;
      end
      else
      begin
-
-          if B_ >= C_ then Result := B_
-                      else Result := C_;
+          if V2_ <= V3_ then Result := 2 else Result := 3;
      end;
 end;
 
-function Max( const A_,B_,C_:Double ) :Double;
+function MinI( const V1_,V2_,V3_:Double ) :Integer;
 begin
-     if A_ >= B_ then
+     if V1_ <= V2_ then
      begin
-          if A_ >= C_ then Result := A_
-                      else Result := C_;
+          if V1_ <= V3_ then Result := 1 else Result := 3;
      end
      else
      begin
-
-          if B_ >= C_ then Result := B_
-                      else Result := C_;
+          if V2_ <= V3_ then Result := 2 else Result := 3;
      end;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
-function MinI( const A_,B_,C_:Integer ) :Integer;
+function MinI( const V1_,V2_,V3_,V4_:Integer ) :Integer;
 begin
-     if A_ <= B_ then
+     if V1_ <= V2_ then
      begin
-          if A_ <= C_ then Result := 1
-                      else Result := 3;
+          if V1_ <= V3_ then
+          begin
+               if V1_ <= V4_ then Result := 1 else Result := 4;
+          end
+          else
+          begin
+               if V3_ <= V4_ then Result := 3 else Result := 4;
+          end;
      end
      else
      begin
-          if B_ <= C_ then Result := 2
-                      else Result := 3;
+          if V2_ <= V3_ then
+          begin
+               if V2_ <= V4_ then Result := 2 else Result := 4;
+          end
+          else
+          begin
+               if V3_ <= V4_ then Result := 3 else Result := 4;
+          end;
      end;
 end;
 
-function MinI( const A_,B_,C_:Single ) :Integer;
+function MinI( const V1_,V2_,V3_,V4_:Single ) :Integer;
 begin
-     if A_ <= B_ then
+     if V1_ <= V2_ then
      begin
-          if A_ <= C_ then Result := 1
-                      else Result := 3;
+          if V1_ <= V3_ then
+          begin
+               if V1_ <= V4_ then Result := 1 else Result := 4;
+          end
+          else
+          begin
+               if V3_ <= V4_ then Result := 3 else Result := 4;
+          end;
      end
      else
      begin
-          if B_ <= C_ then Result := 2
-                      else Result := 3;
+          if V2_ <= V3_ then
+          begin
+               if V2_ <= V4_ then Result := 2 else Result := 4;
+          end
+          else
+          begin
+               if V3_ <= V4_ then Result := 3 else Result := 4;
+          end;
      end;
 end;
 
-function MinI( const A_,B_,C_:Double ) :Integer;
+function MinI( const V1_,V2_,V3_,V4_:Double ) :Integer;
 begin
-     if A_ <= B_ then
+     if V1_ <= V2_ then
      begin
-          if A_ <= C_ then Result := 1
-                      else Result := 3;
+          if V1_ <= V3_ then
+          begin
+               if V1_ <= V4_ then Result := 1 else Result := 4;
+          end
+          else
+          begin
+               if V3_ <= V4_ then Result := 3 else Result := 4;
+          end;
      end
      else
      begin
-          if B_ <= C_ then Result := 2
-                      else Result := 3;
+          if V2_ <= V3_ then
+          begin
+               if V2_ <= V4_ then Result := 2 else Result := 4;
+          end
+          else
+          begin
+               if V3_ <= V4_ then Result := 3 else Result := 4;
+          end;
      end;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
-
-function MaxI( const A_,B_,C_:Integer ) :Integer;
-begin
-     if A_ >= B_ then
-     begin
-          if A_ >= C_ then Result := 1
-                      else Result := 3;
-     end
-     else
-     begin
-          if B_ >= C_ then Result := 2
-                      else Result := 3;
-     end;
-end;
-
-function MaxI( const A_,B_,C_:Single ) :Integer;
-begin
-     if A_ >= B_ then
-     begin
-          if A_ >= C_ then Result := 1
-                      else Result := 3;
-     end
-     else
-     begin
-          if B_ >= C_ then Result := 2
-                      else Result := 3;
-     end;
-end;
-
-function MaxI( const A_,B_,C_:Double ) :Integer;
-begin
-     if A_ >= B_ then
-     begin
-          if A_ >= C_ then Result := 1
-                      else Result := 3;
-     end
-     else
-     begin
-          if B_ >= C_ then Result := 2
-                      else Result := 3;
-     end;
-end;
-
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 function MinI( const Vs_:array of Integer ) :Integer;
 var
@@ -860,7 +602,182 @@ begin
      end
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Max
+
+function Max( const V1_,V2_,V3_:Integer ) :Integer;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then Result := V1_ else Result := V3_;
+     end
+     else
+     begin
+
+          if V2_ >= V3_ then Result := V2_ else Result := V3_;
+     end;
+end;
+
+function Max( const V1_,V2_,V3_:Single ) :Single;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then Result := V1_ else Result := V3_;
+     end
+     else
+     begin
+
+          if V2_ >= V3_ then Result := V2_ else Result := V3_;
+     end;
+end;
+
+function Max( const V1_,V2_,V3_:Double ) :Double;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then Result := V1_ else Result := V3_;
+     end
+     else
+     begin
+          if V2_ >= V3_ then Result := V2_ else Result := V3_;
+     end;
+end;
+
+//------------------------------------------------------------------------------
+
+function MaxI( const V1_,V2_:Integer ) :Byte;
+begin
+     if V1_ <= V2_ then Result := 2 else Result := 1;
+end;
+
+function MaxI( const V1_,V2_:Single ) :Byte;
+begin
+     if V1_ <= V2_ then Result := 2 else Result := 1;
+end;
+
+function MaxI( const V1_,V2_:Double ) :Byte;
+begin
+     if V1_ <= V2_ then Result := 2 else Result := 1;
+end;
+
+//------------------------------------------------------------------------------
+
+function MaxI( const V1_,V2_,V3_:Integer ) :Integer;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then Result := 1 else Result := 3;
+     end
+     else
+     begin
+          if V2_ >= V3_ then Result := 2 else Result := 3;
+     end;
+end;
+
+function MaxI( const V1_,V2_,V3_:Single ) :Integer;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then Result := 1 else Result := 3;
+     end
+     else
+     begin
+          if V2_ >= V3_ then Result := 2 else Result := 3;
+     end;
+end;
+
+function MaxI( const V1_,V2_,V3_:Double ) :Integer;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then Result := 1 else Result := 3;
+     end
+     else
+     begin
+          if V2_ >= V3_ then Result := 2 else Result := 3;
+     end;
+end;
+
+//------------------------------------------------------------------------------
+
+function MaxI( const V1_,V2_,V3_,V4_:Integer ) :Integer;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then
+          begin
+               if V1_ >= V4_ then Result := 1 else Result := 4;
+          end
+          else
+          begin
+               if V3_ >= V4_ then Result := 3 else Result := 4;
+          end;
+     end
+     else
+     begin
+          if V2_ >= V3_ then
+          begin
+               if V2_ >= V4_ then Result := 2 else Result := 4;
+          end
+          else
+          begin
+               if V3_ >= V4_ then Result := 3 else Result := 4;
+          end;
+     end;
+end;
+
+function MaxI( const V1_,V2_,V3_,V4_:Single ) :Integer;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then
+          begin
+               if V1_ >= V4_ then Result := 1 else Result := 4;
+          end
+          else
+          begin
+               if V3_ >= V4_ then Result := 3 else Result := 4;
+          end;
+     end
+     else
+     begin
+          if V2_ >= V3_ then
+          begin
+               if V2_ >= V4_ then Result := 2 else Result := 4;
+          end
+          else
+          begin
+               if V3_ >= V4_ then Result := 3 else Result := 4;
+          end;
+     end;
+end;
+
+function MaxI( const V1_,V2_,V3_,V4_:Double ) :Integer;
+begin
+     if V1_ >= V2_ then
+     begin
+          if V1_ >= V3_ then
+          begin
+               if V1_ >= V4_ then Result := 1 else Result := 4;
+          end
+          else
+          begin
+               if V3_ >= V4_ then Result := 3 else Result := 4;
+          end;
+     end
+     else
+     begin
+          if V2_ >= V3_ then
+          begin
+               if V2_ >= V4_ then Result := 2 else Result := 4;
+          end
+          else
+          begin
+               if V3_ >= V4_ then Result := 3 else Result := 4;
+          end;
+     end;
+end;
+
+//------------------------------------------------------------------------------
 
 function MaxI( const Vs_:array of Integer ) :Integer;
 var
@@ -915,43 +832,72 @@ begin
      end
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FloorMod
 
-function RealMod( const X_,Range_:Integer ) :Integer;
+function FloorMod( const X_,DivN_:Integer ) :Integer;
 begin
-     Result := X_ mod Range_;  if Result < 0 then Inc( Result, Range_ );
+     // Result := ( ( X_ mod DivN_ ) + DivN_ ) mod DivN_;
+
+     Result := X_ mod DivN_;
+
+     if Result < 0 then Inc( Result, DivN_ );
 end;
 
-function RealMod( const X_,Range_:Int64 ) :Int64;
+function FloorMod( const X_,DivN_:Int64 ) :Int64;
 begin
-     Result := X_ mod Range_;  if Result < 0 then Inc( Result, Range_ );
+     // Result := ( ( X_ mod DivN_ ) + DivN_ ) mod DivN_;
+
+     Result := X_ mod DivN_;
+
+     if Result < 0 then Inc( Result, DivN_ );
 end;
 
-////////////////////////////////////////////////////////////////////////////////
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Binomial = Combination
 
-function FileToBytes( const FileName_:string ) :TBytes;
+function Binomial32( N_,K_:UInt32 ) :UInt32;
+var
+   I :UInt32;
 begin
-     with TMemoryStream.Create do
+     if K_ > N_ - K_ then K_ := N_ - K_;
+
+     Result := 1;
+
+     for I := 1 to K_ do
      begin
-          try
-             LoadFromFile( FileName_ );
+          //Result := Result * ( N_ - K_ + I ) div I;
 
-             SetLength( Result, Size );
-
-             Read( Result, Size );
-
-          finally
-                 Free;
-          end;
+          Result := Result * N_ div I;  Dec( N_ );
      end;
 end;
 
-//############################################################################## □
+function Binomial64( N_,K_:UInt32 ) :UInt64;
+var
+   I :UInt32;
+begin
+     if K_ > N_ - K_ then K_ := N_ - K_;
 
-initialization //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 初期化
+     Result := 1;
+
+     for I := 1 to K_ do
+     begin
+          //Result := Result * ( N_ - K_ + I ) div I;
+
+          Result := Result * N_ div I;  Dec( N_ );
+     end;
+end;
+
+function Combination32( N_,K_:UInt32 ) :UInt32;
+begin
+     Result := Binomial32( N_, K_ );
+end;
+
+function Combination64( N_,K_:UInt32 ) :UInt64;
+begin
+     Result := Binomial64( N_, K_ );
+end;
+
+initialization //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
      Randomize;
-
-finalization //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 最終化
 
 end. //######################################################################### ■
