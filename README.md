@@ -4,20 +4,21 @@ Delaunay diagram in 3D for Delphi.
 
 四面体メッシュ（TetraFlip）の上に築いた、逐次添加法による 3D ドロネー図のサンプルです。
 点の追加（Bowyer-Watson 法）と削除（InSphere 誘導のフリップ法）に対応し、FMX の 3D シーンで
-ドロネー四面体とボロノイ辺を表示します。[Delaunay2D](https://github.com/LUXOPHIA/Delaunay2D) の
+ドロネー辺とボロノイ辺をポリゴン化して表示します。[Delaunay2D](https://github.com/LUXOPHIA/Delaunay2D) の
 設計（無限遠頂点方式・統一リフト述語・TFrame ビューア）を 3D に拡張したものです。
 
 ## 構成
 
 ```
-Main.pas / Main.fmx                  … アプリケーション（薄いフォーム。シーン生成コードは持たない）
-_LIBRARY\
-  LUX.Delaunay.D3.pas                … 3D ドロネー図（点の追加・削除・探索）
-  LUX.Delaunay.D3.Viewer.pas/.fmx    … ビューア（TFrame。FMX 3D のシーンをここへ集約）
-  LUXOPHIA\LUX\
-    Data\Model\TetraFlip\            … 四面体メッシュのデータ構造（実装層・型付け層・3D特殊化）
-    …                                … LUX 基盤（ベクトル・リスト・モデル基底）
-Tests\Delaunay3DTest.dpr             … 検証プログラム（構造・向き・空球性・挿入削除の混合試験）
+Main.pas / Main.fmx                    … アプリケーション（薄いフォーム。シーン生成コードは持たない）
+_LIBRARY\LUXOPHIA\
+  LUX.Delaunay\                        … LUX.Delaunay リポジトリ（git subtree）
+    D3\LUX.Delaunay.D3.pas             … 3D ドロネー図（点の追加・削除・探索）
+    D3\LUX.Delaunay.D3.Viewer.pas/.fmx … ビューア（TFrame。FMX 3D のシーンをここへ集約）
+  LUX\                                 … LUX リポジトリ（git subtree）
+    Data\Model\TetraFlip\              … 四面体メッシュのデータ構造（実装層・型付け層・3D特殊化）
+    …                                  … LUX 基盤（ベクトル・リスト・モデル基底）
+Tests\Delaunay3DTest.dpr               … 検証プログラム（構造・向き・空球性・挿入削除の混合試験）
 ```
 
 ## モデル
@@ -45,6 +46,21 @@ Tests\Delaunay3DTest.dpr             … 検証プログラム（構造・向き
   反射辺の環が閉じていれば 3-2 を優先して複製を防ぎ、凸包の周りで生じる体積ゼロの
   鏡像対（ポケット）は 2-0 フリップで除去する。フリップで畳み切れない退化配置
   （数%）は、点のインスタンスを保ったまま胞だけを作り直して確実に取り除く。
+
+## 表示
+
+- **ドロネー辺 / ボロノイ辺** のみを描く。どちらも円柱のような「辺の芯」を張らず、
+  四面体の面やボロノイ面の一部を、辺から `Margin` の幅だけ切り出した平面の帯・柱・錐で
+  構成する（旧 ・Delaunay3D2 のポリゴン化の洗練。曲面が無いのでフラットな面法線が
+  辺の稜線をそのまま見せる）。
+- **ドロネー辺** … 各有限胞の各頂点まわりに、頂点を囲む3面のコーナー点
+  （`MarginCorner` = 角の二等分線上・両辺から等距離・内接円半径でクランプ）を結ぶ
+  4枚の三角形を張る。辺のまわりでは環をなす胞の帯が繋がって辺を包む多角形の管が閉じ、
+  凸包の面は外側の帯で閉じる。
+- **ボロノイ辺** … 各有限胞の外心（＝ボロノイ頂点）のまわりにコーナー三角形の殻を張り、
+  有限の隣の外心へは三角柱の半分を渡して両側から1本の柱を完成させる。無限遠胞へは
+  長さ `RayLength` の錐で閉じる。辺の方向は隣接胞の同次外心から得られる
+  （有限胞 → 外心まで、無限遠胞 → W = 0 に退化して外向きの方向）。
 
 ## 操作
 
