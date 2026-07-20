@@ -1,0 +1,72 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Delaunay 3D'
+  ClientHeight = 512
+  ClientWidth = 642
+  Position = ScreenCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  DesignerMasterStyle = 0
+  inline Viewer1: TDelaunayViewer
+    Align = Client
+    Size.Width = 522.00000000000000000
+    Size.Height = 512.00000000000000000
+    Size.PlatformDefault = False
+    OnMouseDown = Viewer1MouseDown
+    OnMouseMove = Viewer1MouseMove
+    OnMouseUp = Viewer1MouseUp
+    OnMouseWheel = Viewer1MouseWheel
+  end
+  object Panel1: TPanel
+    Align = Right
+    Position.X = 522.00000000000000000
+    Size.Width = 120.00000000000000000
+    Size.Height = 512.00000000000000000
+    Size.PlatformDefault = False
+    StyleLookup = 'pushpanel'
+    TabOrder = 1
+    object ButtonC: TButton
+      Margins.Left = 8.00000000000000000
+      Margins.Top = 8.00000000000000000
+      Margins.Right = 8.00000000000000000
+      Position.X = 10.00000000000000000
+      Position.Y = 10.00000000000000000
+      Size.Width = 100.00000000000000000
+      Size.Height = 50.00000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Text = 'Clear'
+      OnClick = ButtonCClick
+    end
+    object ButtonA: TButton
+      Margins.Left = 8.00000000000000000
+      Margins.Top = 8.00000000000000000
+      Margins.Right = 8.00000000000000000
+      Position.X = 10.00000000000000000
+      Position.Y = 70.00000000000000000
+      Size.Width = 100.00000000000000000
+      Size.Height = 50.00000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = 'Add x10'
+      OnClick = ButtonAClick
+    end
+    object ButtonD: TButton
+      Margins.Left = 8.00000000000000000
+      Margins.Top = 8.00000000000000000
+      Margins.Right = 8.00000000000000000
+      Position.X = 10.00000000000000000
+      Position.Y = 130.00000000000000000
+      Size.Width = 100.00000000000000000
+      Size.Height = 50.00000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Text = 'Del x10'
+      OnClick = ButtonDClick
+    end
+  end
+end
