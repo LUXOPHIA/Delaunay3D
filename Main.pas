@@ -57,9 +57,9 @@ begin
 
           Distance := 15;
 
-          Poins.Radius := 0.08;
-          Edges.Radius := 0.02;
-          Cells.Shrink := 0.5;
+          Edges.Margin    := 0.05;
+          Voros.Margin    := 0.05;
+          Voros.RayLength := 10;
      end;
 
      ButtonAClick( Sender );
