@@ -6,7 +6,7 @@
 
 Add and remove points and watch the Delaunay tetrahedralization and the Voronoi diagram update live, rendered as polygonal solids in an FMX 3D scene. Built on the [LUX.Delaunay](https://github.com/LUXOPHIA/LUX.Delaunay) library:
 
-- Incremental **insertion** (Bowyer–Watson) and **deletion** (flip-based) — the diagram stays Delaunay after every operation.
+- Incremental **insertion** (Bowyer–Watson) and **deletion** (star removal with a deterministic refill from a small Delaunay diagram of the link) — the diagram stays Delaunay after every operation; on degenerate input `AddPoin` returns `nil` and `DeletePoin` returns `False`.
 - **Infinite-vertex method** — no super-tetrahedron, no bounding box; hull points behave like interior points.
 - **Polygonized edges** — Delaunay edges are polygonal tubes assembled from the frames of the tetrahedra faces, Voronoi edges are triangular prisms between circumcenters with cones on the unbounded rays. Flat shading shows the structure as crisp solids.
 - Rendering by the library's `TDelaunayViewer` frame; the application itself contains no scene code.
