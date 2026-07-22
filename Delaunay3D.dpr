@@ -9,6 +9,7 @@ uses
   LUX.D2 in '_LIBRARY\LUXOPHIA\LUX\LUX.D2.pas',
   LUX.D3 in '_LIBRARY\LUXOPHIA\LUX\LUX.D3.pas',
   LUX.D4 in '_LIBRARY\LUXOPHIA\LUX\LUX.D4.pas',
+  LUX.Data in '_LIBRARY\LUXOPHIA\LUX\Data\LUX.Data.pas',
   LUX.Data.List.core in '_LIBRARY\LUXOPHIA\LUX\Data\List\LUX.Data.List.core.pas',
   LUX.Data.List in '_LIBRARY\LUXOPHIA\LUX\Data\List\LUX.Data.List.pas',
   LUX.Data.Model.Poins in '_LIBRARY\LUXOPHIA\LUX\Data\Model\LUX.Data.Model.Poins.pas',
