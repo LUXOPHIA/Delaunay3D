@@ -129,6 +129,7 @@
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\LUX.D2.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\LUX.D3.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\LUX.D4.pas"/>
+        <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\Data\LUX.Data.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\Data\List\LUX.Data.List.core.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\Data\List\LUX.Data.List.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\Data\Model\LUX.Data.Model.Poins.pas"/>
