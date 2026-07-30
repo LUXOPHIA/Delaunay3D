@@ -124,23 +124,23 @@ Both the cut-out and the stitching are settled by purely combinatorial checks �
 
 ```
 [Ownership]
-・TForm1 (Main.pas)    ：application: event forwarding only
-  ┣・TDelaunay3D    ：diagram model (LUX.Delaunay.D3)
-  ┃  ┣・PoinInf :TDelaPoin3DInf    ：single vertex at infinity
+・TForm1 (Main.pas)                      ･･･ application: event forwarding only
+  ┣・TDelaunay3D                        ･･･ diagram model (LUX.Delaunay.D3)
+  ┃  ┣・PoinInf :TDelaPoin3DInf        ･･･ single vertex at infinity
   ┃  ┣・Poins :TDelaPoinSet3D
-  ┃  ┃  ┗・TDelaPoin3D    ：finite vertex (Lift, InSphered)
+  ┃  ┃  ┗・TDelaPoin3D                ･･･ finite vertex (Lift, InSphered)
   ┃  ┗・Cells :TDelaCellSet3D
-  ┃     ┗・TDelaCell3D    ：tetrahedron (InSphere, Circum)
-  ┗・Viewer1 :TDelaunayViewer (frame)    ：rendering (LUX.Delaunay.D3.Viewer)
-     ┣・TDelaunayViewport (TViewport3D)    ：orbit rig Yaw→Pitch→TCamera
-     ┣・TDelaunayEdges (TControl3D)    ：Delaunay edges → polygonal tubes
-     ┗・TDelaunayVoros (TControl3D)    ：Voronoi edges → prisms and cones
+  ┃     ┗・TDelaCell3D                 ･･･ tetrahedron (InSphere, Circum)
+  ┗・Viewer1 :TDelaunayViewer (frame)   ･･･ rendering (LUX.Delaunay.D3.Viewer)
+     ┣・TDelaunayViewport (TViewport3D) ･･･ orbit rig Yaw→Pitch→TCamera
+     ┣・TDelaunayEdges (TControl3D)     ･･･ Delaunay edges → polygonal tubes
+     ┗・TDelaunayVoros (TControl3D)     ･･･ Voronoi edges → prisms and cones
 
 [Inheritance: TetraFlip mesh layer (LUX) → Delaunay classes]
 ・TTetraPoin3D
   ┗・TDelaPoin3D
 
-・TTetraCell3D    ：connectivity: Weld / CanWeld / VertTable / BondTable
+・TTetraCell3D                           ･･･ connectivity (Weld, VertTable, …)
   ┗・TDelaCell3D
 
 ・TTetraCellSet3D
@@ -152,14 +152,14 @@ The model notifies the viewer through the multicast `OnChange`; the viewer rebui
 ### 3.2 File layout
 
 ```
-・Delaunay3D.dpr / Main.pas / Main.fmx    ：thin form; no scene code
-・_LIBRARY\LUXOPHIA\    ：git-subtree copies of library repositories
-  ┣・LUX.Delaunay\    ：https://github.com/LUXOPHIA/LUX.Delaunay
-  ┃  ┣・D3\LUX.Delaunay.D3.pas    ：3D diagram (TDelaunay3D and friends)
-  ┃  ┗・D3\LUX.Delaunay.D3.Viewer.pas/.fmx    ：TDelaunayViewer frame
-  ┗・LUX\    ：https://github.com/LUXOPHIA/LUX (base library)
-     ┣・Data\Model\TetraFlip\    ：tetrahedral mesh layer (TTetraCell3D …)
-     ┗・LUX.pas / LUX.D3.pas / LUX.D4.pas    ：vectors, delegates, utilities
+・Delaunay3D.dpr / Main.pas / Main.fmx       ･･･ thin form; no scene code
+・_LIBRARY\LUXOPHIA\                         ･･･ git-subtree library copies
+  ┣・LUX.Delaunay\                          ･･･ LUX.Delaunay repository
+  ┃  ┣・D3\LUX.Delaunay.D3.pas             ･･･ 3D diagram (TDelaunay3D)
+  ┃  ┗・D3\LUX.Delaunay.D3.Viewer.pas/.fmx ･･･ TDelaunayViewer frame
+  ┗・LUX\                                   ･･･ base library repository
+     ┣・Data\Model\TetraFlip\               ･･･ tetrahedral mesh layer
+     ┗・LUX.pas / LUX.D3.pas / LUX.D4.pas   ･･･ vectors, delegates, utilities
 ```
 
 ## 4. Usage

@@ -124,23 +124,23 @@ $q$ を外接球に含む胞は**ジャンプ＆ウォーク** [7] で検索し�
 
 ```
 [Ownership]
-・TForm1 (Main.pas)    ：application: event forwarding only
-  ┣・TDelaunay3D    ：diagram model (LUX.Delaunay.D3)
-  ┃  ┣・PoinInf :TDelaPoin3DInf    ：single vertex at infinity
+・TForm1 (Main.pas)                      ･･･ application: event forwarding only
+  ┣・TDelaunay3D                        ･･･ diagram model (LUX.Delaunay.D3)
+  ┃  ┣・PoinInf :TDelaPoin3DInf        ･･･ single vertex at infinity
   ┃  ┣・Poins :TDelaPoinSet3D
-  ┃  ┃  ┗・TDelaPoin3D    ：finite vertex (Lift, InSphered)
+  ┃  ┃  ┗・TDelaPoin3D                ･･･ finite vertex (Lift, InSphered)
   ┃  ┗・Cells :TDelaCellSet3D
-  ┃     ┗・TDelaCell3D    ：tetrahedron (InSphere, Circum)
-  ┗・Viewer1 :TDelaunayViewer (frame)    ：rendering (LUX.Delaunay.D3.Viewer)
-     ┣・TDelaunayViewport (TViewport3D)    ：orbit rig Yaw→Pitch→TCamera
-     ┣・TDelaunayEdges (TControl3D)    ：Delaunay edges → polygonal tubes
-     ┗・TDelaunayVoros (TControl3D)    ：Voronoi edges → prisms and cones
+  ┃     ┗・TDelaCell3D                 ･･･ tetrahedron (InSphere, Circum)
+  ┗・Viewer1 :TDelaunayViewer (frame)   ･･･ rendering (LUX.Delaunay.D3.Viewer)
+     ┣・TDelaunayViewport (TViewport3D) ･･･ orbit rig Yaw→Pitch→TCamera
+     ┣・TDelaunayEdges (TControl3D)     ･･･ Delaunay edges → polygonal tubes
+     ┗・TDelaunayVoros (TControl3D)     ･･･ Voronoi edges → prisms and cones
 
 [Inheritance: TetraFlip mesh layer (LUX) → Delaunay classes]
 ・TTetraPoin3D
   ┗・TDelaPoin3D
 
-・TTetraCell3D    ：connectivity: Weld / CanWeld / VertTable / BondTable
+・TTetraCell3D                           ･･･ connectivity (Weld, VertTable, …)
   ┗・TDelaCell3D
 
 ・TTetraCellSet3D
@@ -152,14 +152,14 @@ $q$ を外接球に含む胞は**ジャンプ＆ウォーク** [7] で検索し�
 ### 3.2 ファイル構成
 
 ```
-・Delaunay3D.dpr / Main.pas / Main.fmx    ：薄いフォーム。シーン生成コードなし
-・_LIBRARY\LUXOPHIA\    ：ライブラリリポジトリの git subtree コピー
-  ┣・LUX.Delaunay\    ：https://github.com/LUXOPHIA/LUX.Delaunay
-  ┃  ┣・D3\LUX.Delaunay.D3.pas    ：3D ドロネー図（TDelaunay3D ほか）
-  ┃  ┗・D3\LUX.Delaunay.D3.Viewer.pas/.fmx    ：TDelaunayViewer フレーム
-  ┗・LUX\    ：https://github.com/LUXOPHIA/LUX（基盤ライブラリ）
-     ┣・Data\Model\TetraFlip\    ：四面体メッシュ層（TTetraCell3D …）
-     ┗・LUX.pas / LUX.D3.pas / LUX.D4.pas    ：ベクトル・デリゲートなど
+・Delaunay3D.dpr / Main.pas / Main.fmx       ･･･ 薄いフォーム。シーンコードなし
+・_LIBRARY\LUXOPHIA\                         ･･･ ライブラリの git subtree コピー
+  ┣・LUX.Delaunay\                          ･･･ LUX.Delaunay リポジトリ
+  ┃  ┣・D3\LUX.Delaunay.D3.pas             ･･･ 3D ドロネー図（TDelaunay3D）
+  ┃  ┗・D3\LUX.Delaunay.D3.Viewer.pas/.fmx ･･･ TDelaunayViewer フレーム
+  ┗・LUX\                                   ･･･ 基盤ライブラリのリポジトリ
+     ┣・Data\Model\TetraFlip\               ･･･ 四面体メッシュ層
+     ┗・LUX.pas / LUX.D3.pas / LUX.D4.pas   ･･･ ベクトル・デリゲートなど
 ```
 
 ## 4. 使い方
